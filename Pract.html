@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кулинарный Мир — Полная коллекция</title>
+  <style>
+    :root{
+      --bg:#0b0f12;
+      --card:#0f1518;
+      --accent:#ff6b3d;
+      --muted: #a6b0b4;
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(255,107,61,0.06), transparent), var(--bg);
+      color:#e8eef0;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+
+    header{
+      padding:26px 20px;
+      display:flex;
+      align-items:center;
+      gap:20px;
+      border-bottom:1px solid rgba(255,107,61,0.06);
+      backdrop-filter: blur(6px);
+    }
+    .logo{
+      display:flex;gap:12px;align-items:center;font-weight:800;font-size:22px;color:var(--accent);
+    }
+    .logo-emoji{font-size:24px}
+    .top-actions{margin-left:auto;display:flex;gap:12px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 14px;border-radius:10px;color:var(--muted);cursor:pointer;transition:all .2s}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#ff8e66);border:none;color:#081018}
+    .btn:hover{transform:translateY(-3px)}
+
+    .hero{padding:34px 20px;text-align:center}
+    .hero h1{margin:0;font-size:34px;letter-spacing:0.6px}
+    .hero p{margin:8px 0 0;color:var(--muted)}
+
+    .controls{display:flex;gap:12px;justify-content:center;padding:18px 20px;flex-wrap:wrap}
+    .chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);cursor:pointer;color:var(--muted)}
+    .chip.active{background:linear-gradient(90deg,var(--accent),#ff8e66);color:#081018;border:none}
+    .search{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--card);color:inherit;min-width:220px}
+
+    .grid{width:95%;max-width:1200px;margin:22px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;padding-bottom:40px}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), var(--card));border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(2,6,10,0.6);transform:translateY(0);transition:all .28s;opacity:0;animation:fadeInUp .5s forwards}
+    .card[data-index]{animation-delay:calc(0.03s * var(--i))}
+    .card:hover{transform:translateY(-8px) scale(1.01)}
+    .media{height:160px;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .media img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+    .card:hover .media img{transform:scale(1.08)}
+    .meta{padding:14px}
+    .title{font-size:18px;margin:0;color:#fff}
+    .desc{font-size:14px;color:var(--muted);margin:8px 0}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{font-size:12px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted)}
+
+    footer{padding:20px;text-align:center;border-top:1px solid rgba(255,107,61,0.06);color:var(--muted)}
+
+    /* animations */
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* responsive tweaks */
+    @media (max-width:600px){.hero h1{font-size:22px}.media{height:140px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><span class="logo-emoji">🍽️</span>Кулинарный Мир</div>
+    <div class="top-actions">
+      <input class="search" id="search" placeholder="Поиск блюд...">
+      <button class="btn" id="toggleTheme">Тема</button>
+      <a href="k.html" class="btn primary">Регистрация</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Коллекция рецептов — не просто красиво, а полезно</h1>
+    <p>Более 30 блюд с корректными, адекватными описаниями. Фильтры, поиск и плавные эффекты.</p>
+  </div>
+
+  <div class="controls" id="filters">
+    <div class="chip active" data-filter="all">Все</div>
+    <div class="chip" data-filter="breakfast">Завтраки</div>
+    <div class="chip" data-filter="main">Основные</div>
+    <div class="chip" data-filter="dessert">Десерты</div>
+    <div class="chip" data-filter="salad">Салаты</div>
+    <div class="chip" data-filter="soup">Супы</div>
+    <div class="chip" data-filter="street">Стритфуд</div>
+    <div class="chip" data-filter="vegan">Веган</div>
+  </div>
+
+  <div class="grid" id="grid">
+    <!-- We'll render cards here via JS for convenience -->
+  </div>
+
+  <footer>© 2025 Кулинарный Мир — Все рецепты подобраны и описаны корректно</footer>
+
+  <script>
+    const dishes = [
+      {title:'Воздушные блины', desc:'Пышные блины на молоке — лёгкие, хорошо подрумяненные. Подавайте с мёдом или джемом.', img:'https://cdn.pixabay.com/photo/2017/05/07/08/56/pancakes-2291908_1280.jpg', href:'https://www.youtube.com/watch?v=QX-THYs8ZMk', tags:['breakfast']},
+      {title:'Овсянка с ягодами', desc:'Густая овсяная каша на воде или молоке с тёмными ягодами и мёдом. Быстро и полезно.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTER-LocykdYpo1iiq8oKdwzwJ6GIOCiU2DaYi1SVZycJU_UnXLroPSKf6IYFOdCsE4t0-I5lxLdSbIc2LNyZ4Tx4Io-wyVnK5Y35HpYGqn&s=10', tags:['breakfast','vegan']},
+      {title:'Яичница с томатами', desc:'Яйца, слегка поджаренные, с дольками томата и зеленью — сытный завтрак за 10 минут.', img:'https://www.russianfood.com/dycontent/images_upl/332/big_331048.jpg', tags:['breakfast']},
+      {title:'Классический бургер', desc:'Домашняя котлета, свежая булочка и овощи. Простой и сочный вариант для обеда.', img:'https://cdn.pixabay.com/photo/2016/03/05/19/02/hamburger-1238246_1280.jpg', tags:['main','street']},
+      {title:'Паста Болоньезе', desc:'Паста с томатно-мясным соусом, приготовленным на медленном огне — насыщенный вкус.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjePWAvK5LRmxW35UeWl9r7Ko_qd93jOTImXI_Kg1MxQn_ordOmBBk5mkCPk1y-fvDRp8cVIOr8sLaIjpQT1JBEKggRB8__QpRx9_uiHeoOA&s=10', tags:['main']},
+      {title:'Пицца Маргарита', desc:'Тонкая корочка, томатный соус, моцарелла и базилик — классика итальянской кухни.', img:'https://cdn.pixabay.com/photo/2017/12/09/08/18/pizza-3007395_1280.jpg', tags:['main','street']},
+      {title:'Рамен', desc:'Ароматный бульон, лапша и мягкое яйцо. Сбалансированный и согревающий суп.', img:'https://upload.wikimedia.org/wikipedia/commons/f/f0/Shoyu_ramen%2C_at_Kasukabe_Station_%282014.05.05%29_2.jpg', tags:['soup','main']},
+      {title:'Узбекский плов', desc:'Плов с ломтиками мяса, морковью и специями — традиционное сытное блюдо.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxt7xwQfvo8IFc6s2J60RXEkiT9k-0ENvDeR3J-ul57JpOT_EBlrP9MUj3Cm9z3o57aqw1CBk3jJHsFm--SFtG94EEsUX83Bui7M80b46D6Q&s=10', tags:['main']},
+      {title:'Суши ассорти', desc:'Набор роллов и нигири с разными начинками — лёгкий и деликатесный выбор.', img:'https://cdn.pixabay.com/photo/2016/03/05/19/02/sushi-1238248_1280.jpg', tags:['main']},
+      {title:'Шашлык', desc:'Нежно маринованное мясо, приготовленное на открытом огне — сочно и ароматно.', img:'https://cdn.pixabay.com/photo/2016/03/05/19/02/shashlik-1238247_1280.jpg', tags:['main']},
+      {title:'Цезарь с курицей', desc:'Хрустящие листья салата, тёплая курица и мягкий соус Цезарь — сбалансированный салат.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBoMN5oJH38HD9UMFAlNcApQfg09ZILuBcE2AlwBSsyk1FSl8NUB2oC0M&s', tags:['salad']},
+      {title:'Греческий салат', desc:'Огурцы, томаты, сыр фета и оливки — простой и яркий салат.', img:'https://cdn.pixabay.com/photo/2017/05/07/08/56/salad-2291909_1280.jpg', tags:['salad','vegan']},
+      {title:'Лёгкий овощной суп', desc:'Овощи в прозрачном бульоне — нежно, диетично и питательно.', img:'https://img.povar.ru/640w/99/e0/7c/ff/ovoshnoi_sup_klassicheskii-327375.JPG', tags:['soup','vegan']},
+      {title:'Шоколадный торт', desc:'Насыщенный шоколадный бисквит и крем — десерт для праздника.', img:'https://www.koolinar.ru/all_image/recipes/137/137034/recipe_0cb501fa-7100-4bd2-bc8f-28edd7af398b_w450.webp', tags:['dessert']},
+      {title:'Чизкейк с ягодами', desc:'Кремовый чизкейк на песочной основе — нежно и немного кисловато от ягод.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStTomIGkW2yWM49dyGHBoO0Amx0hASuKWo6x1E6fsYA0SxSSjn-v1B9T8fQJyOH-XaIJBnfWU9Q3Y5B-2GsmgoWdBa6hrOcn4UAFhtySOf&s=10', tags:['dessert']},
+      {title:'Фалафель', desc:'Хрустящие шарики из нута — отличный веганский перекус или часть блюда.', img:'data:image/jpeg;base64,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', tags:['street','vegan']},
+      {title:'Бешбармак', desc:'Традиционное тюркское блюдо с тонкой лапшой и тушёным мясом.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3VGTl2puuuPjKTv49XcF34zTer1lj4gNiO5Vcb7uJW2NUoSExgsfdDpqVmzIjeuvqb3UZD0c8MgifvhE9___Opcuyw_r_oixftFfyaFbjaA&s=10', tags:['main']},
+      {title:'Овощной рататуй', desc:'Тушёные овощи слоями — красивая и полезная овощная запеканка.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRD3dxXlvLopwge5UO-dEoBqpIURgUaRavEopZJiAUWoeDHwMUllxEw2u9nnfx8xZCrnU2o_gBWXUMdluqOAaM81c-acjsEhMgf7n5JRUV_2Q&s=10', tags:['main','vegan']},
+      {title:'Крем-суп из грибов', desc:'Нежный суп-пюре с грибным вкусом — подаётся с гренками.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3VFM4ehix71ONN9rDgTTUf73ncVbNEIf3OXWohdzajUT6T8KT6pV5QhQNfH7LANJSc2A6xjrCU-Sfrknyb4DIhQUVq6yhxSJ-pDnO5RBn_A&s=10', tags:['soup']},
+      {title:'Картофельное пюре с травами', desc:'Классическое пюре с добавлением сливочного масла и свежих трав.', img:'https://cdn.pixabay.com/photo/2017/12/09/08/18/potatoes-3007396_1280.jpg', tags:['main']},
+      {title:'Солянка', desc:'Густой и насыщенный суп с мясными добавками и кислинкой лимона.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3vAJr711T2osxni6papRlw_fLn3hA8J-aW1AokKhXnjMWWjgs6s840AyA-6g1e1sUu_oKTRNgWp3BmEhu0URAfrpb0xKTyzzcgbKKxUYU&s=10', tags:['soup']},
+      {title:'Шоколадные трюфели', desc:'Небольшие десертные конфеты из тёмного шоколада — идеально к кофе.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8pZIqIKoBlrORFMLJUoD3sUVR3oK20Mkyl4CYrd58lpvjxEeM8Q3sxs9UdZoSK0rlKKrwrcPLpJrRS7KWBZemBa-PTLFlok-U7BXsUHs8&s=10', tags:['dessert']},
+      {title:'Салат табуле', desc:'Освежающий салат из булгура с петрушкой, помидорами и лимоном.', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjAt0a52TI2-KNMPbY_kzSLMz_FKdPEgDJ4vIiSllFAi58HHFAIUcxZOj3djsw9nn6QOu0CRlLX3D8_1StfGzASqINIdb8irnkA0gNC9E1bA&s=10', tags:['salad','vegan']}
+    ];
+
+    const grid = document.getElementById('grid');
+    function render(filter='all', q=''){
+      grid.innerHTML='';
+      const results = dishes.filter((d,i)=>{
+        const matchFilter = filter==='all' || d.tags.includes(filter);
+        const matchQuery = q.trim()==='' || (d.title + ' ' + d.desc).toLowerCase().includes(q.toLowerCase());
+        return matchFilter && matchQuery;
+      });
+      results.forEach((d,i)=>{
+        const el = document.createElement('div');
+        el.className='card';
+        el.style.setProperty('--i', i);
+        el.setAttribute('data-index', i);
+        el.innerHTML = `
+          <div class="media"><img src="${d.img}" alt="${d.title}"></div>
+          <div class="meta">
+            <h3 class="title">${d.title}</h3>
+            <p class="desc">${d.desc}</p>
+            <div class="tags">${d.tags.map(t=>`<div class="tag">${t}</div>`).join('')}</div>
+          </div>`;
+        grid.appendChild(el);
+      });
+      if(results.length===0){grid.innerHTML='<p style="color:var(--muted);text-align:center;width:100%">Ничего не найдено — попробуйте другой фильтр или запрос.</p>'}
+    }
+
+    // initial render
+    render();
+
+    // filters
+    document.getElementById('filters').addEventListener('click', e=>{
+      const chip = e.target.closest('.chip');
+      if(!chip) return;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      render(chip.dataset.filter, document.getElementById('search').value);
+    });
+
+    // search
+    document.getElementById('search').addEventListener('input', e=>{
+      const active = document.querySelector('.chip.active').dataset.filter||'all';
+      render(active, e.target.value);
+    });
+
+    // theme toggle (simple)
+    document.getElementById('toggleTheme').addEventListener('click', ()=>{
+      document.documentElement.style.setProperty('--bg', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()==='#0b0f12' ? '#f6f7f8' : '#0b0f12');
+      document.documentElement.style.setProperty('--card', getComputedStyle(document.documentElement).getPropertyValue('--card').trim()==='#0f1518' ? '#ffffff' : '#0f1518');
+      document.documentElement.style.setProperty('--muted', getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()==='#a6b0b4' ? '#6b6f73' : '#a6b0b4');
+    });
+
+  </script>
+</body>
+</html>
